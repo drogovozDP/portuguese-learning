@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Word Trainer</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+    }
+    select, input, button {
+      font-size: 1em;
+      padding: 6px;
+      margin-top: 6px;
+    }
+    input {
+      width: 100%;
+    }
+    .result {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    .wrong {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Portuguese Word Trainer</h2>
+
+<label>
+  Choose dictionary:
+  <select id="dict"></select>
+</label>
+
+<button onclick="start()">Start training</button>
+
+<hr>
+
+<div id="trainer" style="display:none;">
+  <div id="question_number"></div>
+  <br>
+  <div id="question"></div>
+  <input
+    id="answer"
+    placeholder="Type translation..."
+    onkeydown="handleKey(event)"
+  />
+  <button onclick="check()">Check</button>
+  <div class="result" id="result"></div>
+</div>
+
+<div class="wrong" id="summary"></div>
+
+<script>
+  let pairs = [];
+  let index = 0;
+  let wrong = [];
+  let current;
+
+  async function loadDicts() {
+    const res = await fetch("/api/dicts");
+    const dicts = await res.json();
+    const select = document.getElementById("dict");
+    dicts.forEach(d => {
+      const opt = document.createElement("option");
+      opt.value = d;
+      opt.textContent = d;
+      select.appendChild(opt);
+    });
+  }
+
+  async function start() {
+    const dict = document.getElementById("dict").value;
+    const res = await fetch(`/api/session/start?dict_name=${dict}`, {
+      method: "POST"
+    });
+    const data = await res.json();
+
+    pairs = data.pairs;
+    index = 0;
+    wrong = [];
+
+    document.getElementById("trainer").style.display = "block";
+    document.getElementById("summary").innerHTML = "";
+
+    next();
+  }
+
+  function next() {
+    if (index >= pairs.length) {
+      finish();
+      return;
+    }
+    current = pairs[index];
+    document.getElementById("question").innerText =
+      current.ru[Math.floor(Math.random() * current.ru.length)];
+    document.getElementById("question_number").innerText = `Question ${index + 1}/${pairs.length}`;
+    document.getElementById("answer").value = "";
+    document.getElementById("result").innerText = "";
+  }
+
+  async function check() {
+    const answer = document.getElementById("answer").value;
+    const ru = document.getElementById("question").innerText;
+
+    const res = await fetch("/api/check", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        answer: answer,
+        pt: current.pt,
+        ru: ru
+      })
+    });
+
+    const data = await res.json();
+
+    if (!data.correct) {
+      wrong.push({
+        ru: data.ru,
+        pt: data.pt,
+        answer: answer
+      });
+    }
+
+    document.getElementById("result").innerText =
+      data.correct ? "✅ Correct" : "❌ Incorrect";
+
+    index++;
+    setTimeout(next, 500);
+  }
+
+  function finish() {
+    document.getElementById("trainer").style.display = "none";
+
+    const summary = document.getElementById("summary");
+    if (wrong.length === 0) {
+      summary.innerHTML = "<h3>🎉 Perfect score!</h3>";
+      return;
+    }
+
+    let html = `<h3>✅ Correct: ${Math.floor(((pairs.length - wrong.length) / pairs.length) * 100)}%</h3><h3>❌ Incorrect answers</h3><ul>`;
+    wrong.forEach(w => {
+      html += `<li><b>${w.ru}</b> → ${w.pt.join(", ")} – (<b>${w.answer}</b>)</li>`;
+    });
+    html += "</ul>";
+    summary.innerHTML = html;
+  }
+
+  loadDicts();
+</script>
+
+<script>
+  function handleKey(e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      check();
+    }
+  }
+</script>
+
+</body>
+</html>
