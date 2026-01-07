@@ -1,5 +1,4 @@
 venv
-requirements.txt
 dicts/**
 **.DS_Store
 **__pycache__
