@@ -1,5 +1,6 @@
 import random
 import re
+import os
 import unicodedata
 from pathlib import Path
 from fastapi import FastAPI
@@ -7,8 +8,12 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from dotenv import load_dotenv
+
+load_dotenv()  # reads variables from a .env file and sets them in os.environ
+
 ROOT_DIR = Path(__file__).parent
-DICT_DIR = ROOT_DIR / "dicts"
+DICT_DIR = Path(os.environ.get("DICT_DIR", ROOT_DIR / "dicts"))
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
