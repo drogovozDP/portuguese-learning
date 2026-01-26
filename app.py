@@ -21,7 +21,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 def normalize(s: str) -> str:
     return ''.join(
-        c for c in unicodedata.normalize("NFD", s.lower().strip())
+        c for c in s.lower().strip()
         if unicodedata.category(c) != "Mn"
     )
 
