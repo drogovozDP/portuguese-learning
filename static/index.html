@@ -4,25 +4,132 @@
   <meta charset="UTF-8">
   <title>Word Trainer</title>
   <style>
+    :root {
+      --bg: #282a36;
+      --bg-alt: #21222c;
+      --fg: #f8f8f2;
+      --comment: #6272a4;
+      --cyan: #8be9fd;
+      --green: #50fa7b;
+      --pink: #ff79c6;
+      --purple: #bd93f9;
+      --red: #ff5555;
+      --yellow: #f1fa8c;
+      --border: #44475a;
+    }
+
     body {
       font-family: system-ui, sans-serif;
       max-width: 700px;
       margin: 40px auto;
+      background: var(--bg);
+      color: var(--fg);
     }
-    select, input, button {
+
+    h2, h3 {
+      color: var(--purple);
+    }
+
+    label {
+      color: var(--comment);
+    }
+
+    select,
+    input,
+    button {
       font-size: 1em;
-      padding: 6px;
+      padding: 8px;
       margin-top: 6px;
+      background: var(--bg-alt);
+      color: var(--fg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      outline: none;
     }
+
     input {
       width: 100%;
     }
+
+    select:focus,
+    input:focus {
+      border-color: var(--purple);
+      box-shadow: 0 0 0 1px var(--purple);
+    }
+
+    button {
+      cursor: pointer;
+      background: linear-gradient(
+        135deg,
+        var(--purple),
+        var(--pink)
+      );
+      color: #000;
+      border: none;
+      margin-top: 12px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: var(--border);
+      margin: 24px 0;
+    }
+
+    #trainer {
+      background: var(--bg-alt);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    #question_number {
+      color: var(--comment);
+      font-size: 0.9em;
+    }
+
+    #question {
+      font-size: 1.4em;
+      margin: 12px 0;
+      color: var(--cyan);
+    }
+
     .result {
       margin-top: 10px;
       font-weight: bold;
     }
+
+    .result:contains("Correct") {
+      color: var(--green);
+    }
+
     .wrong {
-      margin-top: 20px;
+      margin-top: 30px;
+      background: var(--bg-alt);
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    /* Hide summary if it does NOT contain a list of wrong answers */
+    .wrong:not(:has(ul)) {
+      display: none;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    li b {
+      color: var(--yellow);
     }
   </style>
 </head>
