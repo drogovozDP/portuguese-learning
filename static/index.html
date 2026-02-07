@@ -131,6 +131,76 @@
     li b {
       color: var(--yellow);
     }
+    .slider-label {
+      display: block;
+      margin-top: 20px;
+      color: var(--comment);
+    }
+
+    .slider-label span {
+      color: var(--cyan);
+      font-weight: bold;
+      margin-left: 6px;
+    }
+
+    /* Base slider */
+    .dracula-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      margin-top: 10px;
+      border-radius: 999px;
+      background: linear-gradient(
+        to right,
+        var(--purple),
+        var(--pink)
+      );
+      outline: none;
+    }
+
+    /* Track (Firefox) */
+    .dracula-slider::-moz-range-track {
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(
+        to right,
+        var(--purple),
+        var(--pink)
+      );
+    }
+
+    /* Thumb */
+    .dracula-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 18px;
+      width: 18px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(139, 233, 253, 0.8);
+      transition: transform 0.15s ease;
+    }
+
+    .dracula-slider::-moz-range-thumb {
+      height: 18px;
+      width: 18px;
+      border-radius: 50%;
+      background: var(--bg);
+      border: 2px solid var(--cyan);
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(139, 233, 253, 0.8);
+    }
+
+    /* Hover / focus */
+    .dracula-slider:hover::-webkit-slider-thumb,
+    .dracula-slider:focus::-webkit-slider-thumb {
+      transform: scale(1.15);
+    }
+    #sliderValue {
+      text-transform: lowercase;
+      letter-spacing: 0.04em;
+    }
   </style>
 </head>
 <body>
@@ -141,6 +211,30 @@
   Choose dictionary:
   <select id="dict"></select>
 </label>
+
+<label class="slider-label">
+  Words per session:
+  <span id="sliderValue">max</span>
+</label>
+
+<input
+  type="range"
+  min="5"
+  max="500"
+  step="5"
+  value="500"
+  id="wordSlider"
+  class="dracula-slider"
+  oninput="updateSliderLabel(this)"
+/>
+
+<script>
+  function updateSliderLabel(slider) {
+    const valueSpan = document.getElementById("sliderValue");
+    valueSpan.innerText =
+      slider.value === slider.max ? "max" : slider.value;
+  }
+</script>
 
 <button onclick="start()">Start training</button>
 
@@ -185,8 +279,8 @@
       method: "POST"
     });
     const data = await res.json();
-
-    pairs = data.pairs;
+    const limit = document.getElementById("wordSlider").value;
+    pairs = limit < data.total ? data.pairs.slice(0, limit) : data.pairs;
     index = 0;
     wrong = [];
 
