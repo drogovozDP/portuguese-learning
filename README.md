@@ -9,6 +9,7 @@ uvicorn app:app --reload
 ```
 
 Example dict structure:
+
 ```txt
 # Неправильные глаголы на -er
 ver | видеть # test
