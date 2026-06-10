@@ -98,6 +98,10 @@
       color: var(--cyan);
     }
 
+    #check_next_btn {
+        width: 100px;
+    }
+
     .result {
       margin-top: 10px;
       font-weight: bold;
@@ -249,7 +253,7 @@
     placeholder="Type translation..."
     onkeydown="handleKey(event)"
   />
-  <button onclick="check()">Check</button>
+  <button id="check_next_btn" onclick="check()">Check</button>
   <div class="result" id="result"></div>
 </div>
 
@@ -260,6 +264,7 @@
   let index = 0;
   let wrong = [];
   let current;
+  var is_next;
 
   async function loadDicts() {
     const res = await fetch("/api/dicts");
@@ -287,7 +292,8 @@
     document.getElementById("trainer").style.display = "block";
     document.getElementById("summary").innerHTML = "";
 
-    next();
+    is_next = true;
+    check();
   }
 
   function next() {
@@ -304,6 +310,12 @@
   }
 
   async function check() {
+    if (is_next) {
+      is_next = false
+      next()
+      document.getElementById("check_next_btn").innerText = "Check"
+      return
+    }
     const answer = document.getElementById("answer").value;
     const ru = document.getElementById("question").innerText;
 
@@ -327,11 +339,13 @@
       });
     }
 
-    document.getElementById("result").innerText =
-      data.correct ? "✅ Correct" : "❌ Incorrect";
+    let result = data.correct ? "✅ " : "❌ "
+    result += data.pt
+    document.getElementById("result").innerText = result;
 
     index++;
-    setTimeout(next, 500);
+    is_next = true
+    document.getElementById("check_next_btn").innerText = "Next"
   }
 
   function finish() {
