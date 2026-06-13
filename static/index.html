@@ -261,6 +261,7 @@
 
 <script>
   let pairs = [];
+  let pairs_length = 0;
   let index = 0;
   let wrong = [];
   let current;
@@ -286,6 +287,7 @@
     const data = await res.json();
     const limit = document.getElementById("wordSlider").value;
     pairs = limit < data.total ? data.pairs.slice(0, limit) : data.pairs;
+    pairs_length = pairs.length;
     index = 0;
     wrong = [];
 
@@ -297,14 +299,14 @@
   }
 
   function next() {
-    if (index >= pairs.length) {
+    if (pairs.length == 0) {
       finish();
       return;
     }
-    current = pairs[index];
+    current = pairs.pop();
     document.getElementById("question").innerText =
       current.ru[Math.floor(Math.random() * current.ru.length)];
-    document.getElementById("question_number").innerText = `Question ${index + 1}/${pairs.length}`;
+    document.getElementById("question_number").innerText = `Question ${index + 1}/${pairs_length}`;
     document.getElementById("answer").value = "";
     document.getElementById("result").innerText = "";
   }
@@ -343,9 +345,12 @@
     result += data.pt
     document.getElementById("result").innerText = result;
 
-    index++;
-    is_next = true
-    document.getElementById("check_next_btn").innerText = "Next"
+    index += data.correct ? 1 : 0;
+    if (!data.correct) {
+      pairs.unshift(current);
+    }
+    is_next = true;
+    document.getElementById("check_next_btn").innerText = "Next";
   }
 
   function finish() {
@@ -357,7 +362,7 @@
       return;
     }
 
-    let html = `<h3>✅ Correct: ${Math.floor(((pairs.length - wrong.length) / pairs.length) * 100)}%</h3><h3>❌ Incorrect answers</h3><ul>`;
+    let html = `<h3>✅ Correct: ${Math.floor(((pairs_length - wrong.length) / pairs_length) * 100)}%</h3><h3>❌ Incorrect answers</h3><ul>`;
     wrong.forEach(w => {
       html += `<li><b>${w.ru}</b> → ${w.pt.join(", ")} – (<b>${w.answer}</b>)</li>`;
     });
