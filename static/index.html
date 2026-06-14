@@ -287,6 +287,9 @@
     const data = await res.json();
     const limit = document.getElementById("wordSlider").value;
     pairs = limit < data.total ? data.pairs.slice(0, limit) : data.pairs;
+    pairs.forEach(w => {
+      w["repeat"] = false;
+    });
     pairs_length = pairs.length;
     index = 0;
     wrong = [];
@@ -327,13 +330,13 @@
       body: JSON.stringify({
         answer: answer,
         pt: current.pt,
-        ru: ru
+        ru: ru,
       })
     });
 
     const data = await res.json();
 
-    if (!data.correct) {
+    if ((!data.correct) && (!current.repeat)) {
       wrong.push({
         ru: data.ru,
         pt: data.pt,
@@ -347,6 +350,7 @@
 
     index += data.correct ? 1 : 0;
     if (!data.correct) {
+      current["repeat"] = true
       pairs.unshift(current);
     }
     is_next = true;
